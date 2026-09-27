@@ -1,0 +1,35 @@
+# ===== 图定义：每行 “节点: 依赖节点列表” =====
+graph G1
+A: B C
+B: D
+C:
+D:
+end
+
+graph G2
+X: Y
+Y: Z
+Z:
+end
+
+# 图内环：P -> Q -> R -> P
+graph G3
+P: Q
+Q: R
+R: P
+end
+
+# ===== 跨图引用：xref 源图 源节点 目标图 目标节点 =====
+xref G2 X G1 A        # G2.X 引用 G1.A（G1.A 变更波及 G2.X）
+xref G2 Z G1          # 字段不足：演示解析错误
+xref G2 Z G1 A        # 与下一条构成跨图环 G1.A -> G2.Z -> G2.Y -> G1.D -> G1.B -> G1.A
+xref G1 D G2 Y
+xref G2 X G1 NOPE     # 跨图引用目标节点缺失
+xref G2 X G8 A        # 跨图引用目标图缺失
+
+# ===== 变更操作流：change 图 节点 变更类型 =====
+change G1 B modify
+change G2 Z add
+change G1 B delete    # 同轮覆盖：G1.B 已有变更
+change G9 Q modify    # 图不存在
+change G1 Q modify    # 节点不存在
